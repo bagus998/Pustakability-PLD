@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Users, BookOpen, CheckCircle, XCircle, Clock, Trash2, Edit2, Shield, UserCheck, UserX, BarChart3 } from "lucide-react";
 import { allBooks, pendingBooks } from "../data/books";
 import type { Page } from "../App";
@@ -26,6 +27,7 @@ const statusColors: Record<string, { bg: string; text: string }> = {
 };
 
 export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("overview");
   const [pendingList, setPendingList] = useState(pendingBooks);
 
@@ -37,10 +39,10 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
   const headerBg = dm ? "#0F1623" : "#0A1172";
 
   const tabs: { id: Tab; label: string; icon: React.FC<any> }[] = [
-    { id: "overview", label: "Ringkasan", icon: BarChart3 },
-    { id: "users", label: "Pengguna", icon: Users },
-    { id: "books", label: "Koleksi Buku", icon: BookOpen },
-    { id: "validasi", label: `Validasi (${pendingList.length})`, icon: Clock },
+    { id: "overview", label: t("adminDashboard.tab_overview"), icon: BarChart3 },
+    { id: "users", label: t("adminDashboard.tab_users"), icon: Users },
+    { id: "books", label: t("adminDashboard.tab_books"), icon: BookOpen },
+    { id: "validasi", label: t("adminDashboard.tab_validation", { count: pendingList.length }), icon: Clock },
   ];
 
   return (
@@ -51,11 +53,11 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
           <div className="flex items-center gap-3 mb-1">
             <Shield className="w-6 h-6 text-[#00D4AC]" />
             <h1 className="text-white" style={{ fontSize: "1.75rem", fontWeight: 700 }}>
-              Admin Dashboard
+              {t("adminDashboard.title")}
             </h1>
           </div>
           <p className="text-blue-200" style={{ fontSize: "0.9rem" }}>
-            Kelola pengguna, koleksi buku, dan validasi kontribusi volunteer
+            {t("adminDashboard.subtitle")}
           </p>
         </div>
       </div>
@@ -64,22 +66,22 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
       <div style={{ backgroundColor: card, borderBottom: `1px solid ${border}` }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex overflow-x-auto">
-            {tabs.map((t) => {
-              const Icon = t.icon;
+            {tabs.map((tObj) => {
+              const Icon = tObj.icon;
               return (
                 <button
-                  key={t.id}
-                  onClick={() => setTab(t.id)}
+                  key={tObj.id}
+                  onClick={() => setTab(tObj.id)}
                   className="flex items-center gap-2 px-4 py-4 whitespace-nowrap transition-colors border-b-2"
                   style={{
-                    borderBottomColor: tab === t.id ? "#3B5BDB" : "transparent",
-                    color: tab === t.id ? "#3B5BDB" : muted,
+                    borderBottomColor: tab === tObj.id ? "#3B5BDB" : "transparent",
+                    color: tab === tObj.id ? "#3B5BDB" : muted,
                     fontSize: "0.875rem",
-                    fontWeight: tab === t.id ? 600 : 400,
+                    fontWeight: tab === tObj.id ? 600 : 400,
                   }}
                 >
                   <Icon className="w-4 h-4" />
-                  {t.label}
+                  {tObj.label}
                 </button>
               );
             })}
@@ -93,10 +95,10 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
           <div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
               {[
-                { label: "Total Pengguna", value: mockUsers.length, sub: "+2 minggu ini", icon: Users, color: "#3B5BDB" },
-                { label: "Total Buku", value: allBooks.length, sub: "12 kategori", icon: BookOpen, color: "#0D7070" },
-                { label: "Menunggu Validasi", value: pendingList.length, sub: "Pengajuan volunteer", icon: Clock, color: "#D97706" },
-                { label: "Pengguna Aktif", value: mockUsers.filter(u => u.status === "active").length, sub: "Bulan ini", icon: UserCheck, color: "#16A34A" },
+                { label: t("adminDashboard.stat_users"), value: mockUsers.length, sub: t("adminDashboard.stat_users_sub"), icon: Users, color: "#3B5BDB" },
+                { label: t("adminDashboard.stat_books"), value: allBooks.length, sub: t("adminDashboard.stat_books_sub"), icon: BookOpen, color: "#0D7070" },
+                { label: t("adminDashboard.stat_pending"), value: pendingList.length, sub: t("adminDashboard.stat_pending_sub"), icon: Clock, color: "#D97706" },
+                { label: t("adminDashboard.stat_active"), value: mockUsers.filter(u => u.status === "active").length, sub: t("adminDashboard.stat_active_sub"), icon: UserCheck, color: "#16A34A" },
               ].map((stat, i) => {
                 const Icon = stat.icon;
                 return (
@@ -117,9 +119,9 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
             {/* Quick Actions */}
             <div className="grid sm:grid-cols-3 gap-4">
               {[
-                { label: "Lihat Validasi Tertunda", action: () => setTab("validasi"), color: "#D97706", icon: Clock },
-                { label: "Kelola Pengguna", action: () => setTab("users"), color: "#3B5BDB", icon: Users },
-                { label: "Manajemen Buku", action: () => setTab("books"), color: "#0D7070", icon: BookOpen },
+                { label: t("adminDashboard.action_validation"), action: () => setTab("validasi"), color: "#D97706", icon: Clock },
+                { label: t("adminDashboard.action_users"), action: () => setTab("users"), color: "#3B5BDB", icon: Users },
+                { label: t("adminDashboard.action_books"), action: () => setTab("books"), color: "#0D7070", icon: BookOpen },
               ].map((a, i) => {
                 const Icon = a.icon;
                 return (
@@ -144,13 +146,21 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
         {tab === "users" && (
           <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: card, border: `1px solid ${border}` }}>
             <div className="p-5" style={{ borderBottom: `1px solid ${border}` }}>
-              <h2 style={{ fontSize: "1rem", fontWeight: 600, color: text }}>Daftar Pengguna</h2>
+              <h2 style={{ fontSize: "1rem", fontWeight: 600, color: text }}>{t("adminDashboard.users_title")}</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${border}` }}>
-                    {["Nama", "Email", "Peran", "Fakultas", "Status", "Bergabung", "Aksi"].map(h => (
+                    {[
+                      t("adminDashboard.col_name"),
+                      t("adminDashboard.col_email"),
+                      t("adminDashboard.col_role"),
+                      t("adminDashboard.col_faculty"),
+                      t("adminDashboard.col_status"),
+                      t("adminDashboard.col_joined"),
+                      t("adminDashboard.col_actions")
+                    ].map(h => (
                       <th key={h} className="px-5 py-3 text-left" style={{ fontSize: "0.75rem", fontWeight: 600, color: muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                         {h}
                       </th>
@@ -177,16 +187,18 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
                           className="px-2.5 py-1 rounded-full capitalize"
                           style={{ backgroundColor: `${roleColors[u.role]}18`, color: roleColors[u.role], fontSize: "0.75rem", fontWeight: 600 }}
                         >
-                          {u.role}
+                          {t(`register.role_${u.role}`, { defaultValue: u.role })}
                         </span>
                       </td>
-                      <td className="px-5 py-4" style={{ fontSize: "0.85rem", color: muted }}>{u.faculty}</td>
+                      <td className="px-5 py-4" style={{ fontSize: "0.85rem", color: muted }}>
+                        {t(`register.faculties.${u.faculty}`, { defaultValue: u.faculty })}
+                      </td>
                       <td className="px-5 py-4">
                         <span
                           className="px-2.5 py-1 rounded-full capitalize"
                           style={{ backgroundColor: statusColors[u.status]?.bg, color: statusColors[u.status]?.text, fontSize: "0.75rem", fontWeight: 600 }}
                         >
-                          {u.status === "active" ? "Aktif" : u.status === "pending" ? "Menunggu" : "Ditangguhkan"}
+                          {u.status === "active" ? t("adminDashboard.status_active") : u.status === "pending" ? t("adminDashboard.status_pending") : t("adminDashboard.status_suspended")}
                         </span>
                       </td>
                       <td className="px-5 py-4" style={{ fontSize: "0.85rem", color: muted }}>{u.joined}</td>
@@ -212,13 +224,20 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
         {tab === "books" && (
           <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: card, border: `1px solid ${border}` }}>
             <div className="p-5 flex items-center justify-between" style={{ borderBottom: `1px solid ${border}` }}>
-              <h2 style={{ fontSize: "1rem", fontWeight: 600, color: text }}>Koleksi Buku ({allBooks.length})</h2>
+              <h2 style={{ fontSize: "1rem", fontWeight: 600, color: text }}>{t("adminDashboard.books_title", { count: allBooks.length })}</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${border}` }}>
-                    {["Judul", "Penulis", "Kategori", "Format", "Status", "Aksi"].map(h => (
+                    {[
+                      t("adminDashboard.col_title"),
+                      t("adminDashboard.col_author"),
+                      t("adminDashboard.col_category"),
+                      t("adminDashboard.col_format"),
+                      t("adminDashboard.col_status"),
+                      t("adminDashboard.col_actions")
+                    ].map(h => (
                       <th key={h} className="px-5 py-3 text-left" style={{ fontSize: "0.75rem", fontWeight: 600, color: muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                         {h}
                       </th>
@@ -247,7 +266,7 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
                       </td>
                       <td className="px-5 py-3">
                         <span className="px-2 py-0.5 rounded-full" style={{ backgroundColor: "#DCFCE7", color: "#166534", fontSize: "0.75rem", fontWeight: 600 }}>
-                          Aktif
+                          {t("adminDashboard.status_active")}
                         </span>
                       </td>
                       <td className="px-5 py-3">
@@ -272,7 +291,7 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
         {tab === "validasi" && (
           <div>
             <h2 style={{ fontSize: "1rem", fontWeight: 600, color: text, marginBottom: "1rem" }}>
-              Pengajuan Volunteer Menunggu Validasi
+              {t("adminDashboard.validation_title")}
             </h2>
             {pendingList.length === 0 ? (
               <div
@@ -280,7 +299,7 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
                 style={{ backgroundColor: card, border: `1px solid ${border}` }}
               >
                 <CheckCircle className="w-12 h-12 mx-auto mb-3" style={{ color: "#16A34A" }} />
-                <p style={{ fontSize: "1rem", color: muted }}>Tidak ada pengajuan yang perlu divalidasi.</p>
+                <p style={{ fontSize: "1rem", color: muted }}>{t("adminDashboard.validation_empty")}</p>
               </div>
             ) : (
               <div className="flex flex-col gap-4">
@@ -306,11 +325,11 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
                             ))}
                           </div>
                           <p style={{ fontSize: "0.75rem", color: muted, marginTop: "0.5rem" }}>
-                            Diajukan oleh: <span style={{ color: dm ? "#93C5FD" : "#3B5BDB" }}>{book.submittedBy}</span>
+                            {t("adminDashboard.submitted_by")} <span style={{ color: dm ? "#93C5FD" : "#3B5BDB" }}>{book.submittedBy}</span>
                           </p>
                         </div>
                         <span className="px-2.5 py-1 rounded-full flex-shrink-0" style={{ backgroundColor: "#FEF9C3", color: "#854D0E", fontSize: "0.75rem", fontWeight: 600 }}>
-                          Menunggu
+                          {t("adminDashboard.status_pending")}
                         </span>
                       </div>
                       <div className="flex gap-3 mt-4">
@@ -320,7 +339,7 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
                           style={{ backgroundColor: "#16A34A", fontSize: "0.875rem" }}
                         >
                           <CheckCircle className="w-4 h-4" />
-                          Setujui
+                          {t("adminDashboard.btn_approve")}
                         </button>
                         <button
                           onClick={() => setPendingList(prev => prev.filter(p => p.id !== book.id))}
@@ -328,7 +347,7 @@ export function AdminDashboard({ darkMode: dm, onNavigate }: AdminDashboardProps
                           style={{ border: `1px solid #FCA5A5`, color: "#DC2626", backgroundColor: "#FEF2F2", fontSize: "0.875rem" }}
                         >
                           <XCircle className="w-4 h-4" />
-                          Tolak
+                          {t("adminDashboard.btn_reject")}
                         </button>
                       </div>
                     </div>

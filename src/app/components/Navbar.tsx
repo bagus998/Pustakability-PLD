@@ -37,13 +37,6 @@ export function Navbar({ currentPage, onNavigate, darkMode: dm, onDarkModeToggle
     { id: "catalog" as Page, label: t("navbar.catalog") },
   ];
 
-  const roleLabel: Record<UserRole, string> = {
-    admin:     "Administrator",
-    user:      "Pengguna",
-    volunteer: "Volunteer",
-    guest:     "Tamu",
-  };
-
   const roleBadgeColor: Record<UserRole, string> = {
     admin:     "#BE185D",
     user:      "#00D4AC",
@@ -247,7 +240,7 @@ export function Navbar({ currentPage, onNavigate, darkMode: dm, onDarkModeToggle
                       {user.name.split(" ")[0]}
                     </span>
                     <span style={{ fontSize: "0.65rem", color: roleBadgeColor[role] }}>
-                      {roleLabel[role]}
+                      {t(`navbar.role_${role}`)}
                     </span>
                   </div>
                   <ChevronDown className="w-3.5 h-3.5 text-white/60 hidden sm:block" />
@@ -272,7 +265,7 @@ export function Navbar({ currentPage, onNavigate, darkMode: dm, onDarkModeToggle
                           className="inline-block mt-1 px-2 py-0.5 rounded-full"
                           style={{ backgroundColor: `${roleBadgeColor[role]}18`, color: roleBadgeColor[role], fontSize: "0.7rem", fontWeight: 600 }}
                         >
-                          {roleLabel[role]}
+                          {t(`navbar.role_${role}`)}
                         </span>
                       </div>
 
