@@ -28,7 +28,7 @@ export function TestimonialsSection({ darkMode: dm }: TestimonialsSectionProps) 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="inline-block px-3 py-1 rounded-full mb-3" style={{ backgroundColor: sectionLabelBg, color: sectionLabel, fontSize: "0.8rem", fontWeight: 600 }}>
-            Cerita Pengguna
+            {t("features.label")}
           </div>
           <h2 id="testimonials-heading" style={{ fontSize: "1.9rem", fontWeight: 700, color: text }}>
             {t("features.title")}

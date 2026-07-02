@@ -68,6 +68,7 @@
     "category_all": "All"
   },
   "features": {
+    "label": "What Do They Say?",
     "title": "Learn Easier with Pustakability",
     "name1": "Ahmad Fauzi",
     "role1": "English Literature Student, Blind",
@@ -80,6 +81,7 @@
     "text3": "The DAISY feature is amazing. When I need references for assignments, it's very easy to jump to chapter 3, jump to page 45, etc. The navigation is perfect for blind users."
   },
   "howToAccess": {
+    "label": "How to Access Pustakability?",
     "title": "Four Easy Steps",
     "desc": "We are committed to ensuring that students with print disabilities at Universitas Brawijaya can access course materials easily and without barriers.",
     "step1_title": "Register for a PLD Account",

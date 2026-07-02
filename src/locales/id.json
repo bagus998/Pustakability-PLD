@@ -68,6 +68,7 @@
     "category_all": "Semua"
   },
   "features": {
+    "label": "Cerita Pengguna",
     "title": "Belajar Lebih Mudah dengan Pustakability",
     "name1": "Ahmad Fauzi",
     "role1": "Mahasiswa Sastra Inggris, Tuna Netra",
@@ -80,6 +81,7 @@
     "text3": "Fitur DAISY nya luar biasa. Kalau lagi butuh referensi untuk tugas, saya gampang banget buat lompat ke bab 3, lompat ke halaman 45, dsb. Navigasinya sempurna buat pengguna tunanetra."
   },
   "howToAccess": {
+    "label": "Cara Mendapatkan Akses",
     "title": "Empat Langkah Mudah",
     "desc": "Kami berkomitmen memastikan bahwa mahasiswa dengan disabilitas cetak di Universitas Brawijaya dapat mengakses materi kuliah dengan mudah dan tanpa hambatan.",
     "step1_title": "Daftar Akun PLD",
