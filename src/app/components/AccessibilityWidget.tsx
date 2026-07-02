@@ -6,6 +6,10 @@ interface AccessibilityWidgetProps {
   onHighContrastToggle: () => void;
   fontSize: number;
   onFontSizeChange: (delta: number, reset?: boolean) => void;
+  dyslexiaFont: boolean;
+  onDyslexiaFontToggle: () => void;
+  lineSpacing: number;
+  onLineSpacingChange: (spacing: number) => void;
 }
 
 export function AccessibilityWidget({
@@ -13,10 +17,12 @@ export function AccessibilityWidget({
   onHighContrastToggle,
   fontSize,
   onFontSizeChange,
+  dyslexiaFont,
+  onDyslexiaFontToggle,
+  lineSpacing,
+  onLineSpacingChange,
 }: AccessibilityWidgetProps) {
   const [open, setOpen] = useState(false);
-  const [dyslexiaFont, setDyslexiaFont] = useState(false);
-  const [lineSpacing, setLineSpacing] = useState(1);
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
@@ -128,7 +134,7 @@ export function AccessibilityWidget({
             {/* Dyslexia Font */}
             <div>
               <button
-                onClick={() => setDyslexiaFont(!dyslexiaFont)}
+                onClick={onDyslexiaFontToggle}
                 aria-pressed={dyslexiaFont}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors ${
                   dyslexiaFont
@@ -175,7 +181,7 @@ export function AccessibilityWidget({
                 {[{ label: "Normal", v: 1 }, { label: "1,5×", v: 2 }, { label: "2×", v: 3 }].map((opt) => (
                   <button
                     key={opt.v}
-                    onClick={() => setLineSpacing(opt.v)}
+                    onClick={() => onLineSpacingChange(opt.v)}
                     aria-pressed={lineSpacing === opt.v}
                     className={`flex-1 py-1.5 rounded-lg border text-center transition-colors ${
                       lineSpacing === opt.v
@@ -204,8 +210,9 @@ export function AccessibilityWidget({
               style={{ fontSize: "0.78rem" }}
               onClick={() => {
                 if (highContrast) onHighContrastToggle();
-                setDyslexiaFont(false);
-                setLineSpacing(1);
+                if (dyslexiaFont) onDyslexiaFontToggle();
+                if (lineSpacing !== 1) onLineSpacingChange(1);
+                if (fontSize !== 0) onFontSizeChange(0, true);
               }}
             >
               Reset Semua Pengaturan

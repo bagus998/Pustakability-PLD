@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { X, ChevronLeft, ChevronRight, Menu, Moon, Sun, BookOpen, Lock } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { X, ChevronLeft, ChevronRight, Menu, Moon, Sun, BookOpen, Lock, Play, Pause, Square } from "lucide-react";
 import type { Book } from "../data/books";
 import type { UserRole, Page } from "../App";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { AccessibilityWidget } from "./AccessibilityWidget";
 
 interface EbookReaderProps {
   book: Book;
@@ -18,41 +19,106 @@ export function EbookReader({ book, darkMode: dm, role, onClose, onNavigate, onD
   const [currentPage, setCurrentPage] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // Accessibility States
+  const [highContrast, setHighContrast] = useState(false);
+  const [fontSizeOffset, setFontSizeOffset] = useState(0);
+  const [dyslexiaFont, setDyslexiaFont] = useState(false);
+  const [lineSpacing, setLineSpacing] = useState(1); // 1 = Normal, 2 = 1.5x, 3 = 2x
+
+  // TTS States
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
   const isGuest = role === "guest";
   const canReadFull = !isGuest;
   const previewChapters = isGuest ? Math.min(1, book.chapters.length) : book.chapters.length;
   const isLocked = isGuest && currentChapter >= previewChapters;
 
-  const bg = dm ? "#0D1117" : "#FAFAF8";
-  const readingBg = dm ? "#1A1A2E" : "#FFFFFF";
-  const sidebar = dm ? "#0F1623" : "#F5F7FF";
-  const sidebarBorder = dm ? "#1E2D4F" : "#E5E7EB";
-  const text = dm ? "#E2E8F0" : "#1A1A2A";
+  const bg = highContrast ? "#000000" : (dm ? "#0D1117" : "#FAFAF8");
+  const readingBg = highContrast ? "#000000" : (dm ? "#1A1A2E" : "#FFFFFF");
+  const sidebar = highContrast ? "#111111" : (dm ? "#0F1623" : "#F5F7FF");
+  const sidebarBorder = highContrast ? "#FFFF00" : (dm ? "#1E2D4F" : "#E5E7EB");
+  const text = highContrast ? "#FFFF00" : (dm ? "#E2E8F0" : "#1A1A2A");
   const muted = dm ? "#94A3B8" : "#6B7280";
-  const headerBg = dm ? "#0F1623" : "#FFFFFF";
-  const headerBorder = dm ? "#1E2D4F" : "#E5E7EB";
+  const headerBg = highContrast ? "#111111" : (dm ? "#0F1623" : "#FFFFFF");
+  const headerBorder = highContrast ? "#FFFF00" : (dm ? "#1E2D4F" : "#E5E7EB");
 
   const chapter = book.chapters[Math.min(currentChapter, book.chapters.length - 1)];
 
-  const goNextChapter = () => {
+  const goPrevChapter = useCallback(() => {
+    if (currentChapter > 0) {
+      setCurrentChapter(c => c - 1);
+      setCurrentPage(1);
+    }
+  }, [currentChapter]);
+
+  const goNextChapter = useCallback(() => {
     if (currentChapter < book.chapters.length - 1) {
       if (isGuest && currentChapter + 1 >= previewChapters) return;
       setCurrentChapter(c => c + 1);
       setCurrentPage(1);
     }
-  };
+  }, [currentChapter, book.chapters.length, isGuest, previewChapters]);
 
-  const goPrevChapter = () => {
-    if (currentChapter > 0) {
-      setCurrentChapter(c => c - 1);
-      setCurrentPage(1);
+  // Handle TTS
+  useEffect(() => {
+    window.speechSynthesis.cancel();
+    setIsPlaying(false);
+    setIsPaused(false);
+    return () => window.speechSynthesis.cancel();
+  }, [currentChapter]);
+
+  const toggleTTS = useCallback(() => {
+    if (isPlaying) {
+      if (isPaused) {
+        window.speechSynthesis.resume();
+        setIsPaused(false);
+      } else {
+        window.speechSynthesis.pause();
+        setIsPaused(true);
+      }
+    } else {
+      if (!chapter) return;
+      const utterance = new SpeechSynthesisUtterance(chapter.content);
+      utterance.lang = "id-ID";
+      utterance.onend = () => {
+        setIsPlaying(false);
+        setIsPaused(false);
+      };
+      window.speechSynthesis.speak(utterance);
+      setIsPlaying(true);
+      setIsPaused(false);
     }
-  };
+  }, [isPlaying, isPaused, chapter]);
+
+  const stopTTS = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setIsPlaying(false);
+    setIsPaused(false);
+  }, []);
+
+  // Keyboard Navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === "ArrowRight") {
+        goNextChapter();
+      } else if (e.key === "ArrowLeft") {
+        goPrevChapter();
+      } else if (e.code === "Space") {
+        e.preventDefault();
+        toggleTTS();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [goNextChapter, goPrevChapter, toggleTTS]);
 
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ backgroundColor: bg, fontFamily: "'IBM Plex Sans', system-ui, sans-serif" }}
+      style={{ backgroundColor: bg, fontFamily: dyslexiaFont ? "'OpenDyslexic', sans-serif" : "'IBM Plex Sans', system-ui, sans-serif" }}
     >
       {/* Header Bar */}
       <header
@@ -245,15 +311,42 @@ export function EbookReader({ book, darkMode: dm, role, onClose, onNavigate, onD
                 <div style={{ fontSize: "0.75rem", color: muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>
                   {book.title}
                 </div>
-                <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: text, lineHeight: 1.3 }}>
-                  {chapter?.title}
-                </h1>
+                <div className="flex items-center justify-between">
+                  <h1 style={{ fontSize: `${1.5 + (fontSizeOffset * 0.1)}rem`, fontWeight: 700, color: text, lineHeight: 1.3 }}>
+                    {chapter?.title}
+                  </h1>
+                  
+                  {/* TTS Controls */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={toggleTTS}
+                      className={`p-2.5 rounded-full transition-colors ${highContrast ? "bg-yellow-400 text-black hover:bg-yellow-300" : "bg-[#EEF2FF] text-[#3B5BDB] hover:bg-[#E0E7FF]"}`}
+                      aria-label={isPlaying && !isPaused ? "Jeda Audio" : "Putar Audio"}
+                    >
+                      {isPlaying && !isPaused ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                    </button>
+                    {isPlaying && (
+                      <button
+                        onClick={stopTTS}
+                        className={`p-2.5 rounded-full transition-colors ${highContrast ? "text-yellow-400 hover:bg-yellow-400/20" : "text-gray-500 hover:bg-gray-100"}`}
+                        aria-label="Berhenti Audio"
+                      >
+                        <Square className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Content */}
               <div
                 className="px-10 py-8"
-                style={{ fontSize: "1rem", lineHeight: 1.9, color: text }}
+                style={{ 
+                  fontSize: `${1 + (fontSizeOffset * 0.1)}rem`, 
+                  lineHeight: lineSpacing === 1 ? 1.7 : lineSpacing === 2 ? 2.2 : 2.8, 
+                  color: text 
+                }}
+                aria-live="polite"
               >
                 {chapter?.content.split("\n\n").map((para, i) => (
                   <p key={i} style={{ marginBottom: "1.25rem" }}>
@@ -331,6 +424,18 @@ export function EbookReader({ book, darkMode: dm, role, onClose, onNavigate, onD
           </button>
         </footer>
       )}
+
+      {/* Accessibility Widget */}
+      <AccessibilityWidget
+        highContrast={highContrast}
+        onHighContrastToggle={() => setHighContrast(!highContrast)}
+        fontSize={fontSizeOffset}
+        onFontSizeChange={(delta, reset) => setFontSizeOffset(reset ? 0 : Math.max(-2, Math.min(6, fontSizeOffset + delta)))}
+        dyslexiaFont={dyslexiaFont}
+        onDyslexiaFontToggle={() => setDyslexiaFont(!dyslexiaFont)}
+        lineSpacing={lineSpacing}
+        onLineSpacingChange={setLineSpacing}
+      />
     </div>
   );
 }

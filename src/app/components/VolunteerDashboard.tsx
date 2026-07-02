@@ -38,6 +38,8 @@ export function VolunteerDashboard({ darkMode: dm, user, onNavigate }: Volunteer
     description: "",
     coverUrl: "",
     formats: [] as string[],
+    uploadMethod: "file" as "file" | "paste",
+    bookContent: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -84,7 +86,7 @@ export function VolunteerDashboard({ darkMode: dm, user, onNavigate }: Volunteer
     ]);
     setLoading(false);
     setSubmitted(true);
-    setTimeout(() => { setSubmitted(false); setTab("submissions"); setForm({ title: "", author: "", publisher: "", category: "", year: new Date().getFullYear().toString(), description: "", coverUrl: "", formats: [] }); }, 2500);
+    setTimeout(() => { setSubmitted(false); setTab("submissions"); setForm({ title: "", author: "", publisher: "", category: "", year: new Date().getFullYear().toString(), description: "", coverUrl: "", formats: [], uploadMethod: "file", bookContent: "" }); }, 2500);
   };
 
   const statusBadge: Record<string, { bg: string; text: string; label: string; icon: React.FC<any> }> = {
@@ -360,6 +362,73 @@ export function VolunteerDashboard({ darkMode: dm, user, onNavigate }: Volunteer
                     </p>
                   )}
                 </div>
+
+                {/* Upload Method Toggle */}
+                <div>
+                  <label style={{ fontSize: "0.875rem", fontWeight: 500, color: text, display: "block", marginBottom: "0.5rem" }}>
+                    {t("volunteerDashboard.field_upload_method")}
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, uploadMethod: "file" })}
+                      className="flex-1 py-2 rounded-xl border transition-all"
+                      style={{
+                        borderColor: form.uploadMethod === "file" ? "#0A1172" : border,
+                        backgroundColor: form.uploadMethod === "file" ? (dm ? "#1E2D4F" : "#EEF2FF") : "transparent",
+                        color: form.uploadMethod === "file" ? "#3B5BDB" : muted,
+                        fontSize: "0.85rem",
+                        fontWeight: form.uploadMethod === "file" ? 600 : 400,
+                      }}
+                    >
+                      {t("volunteerDashboard.upload_method_file")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, uploadMethod: "paste" })}
+                      className="flex-1 py-2 rounded-xl border transition-all"
+                      style={{
+                        borderColor: form.uploadMethod === "paste" ? "#0A1172" : border,
+                        backgroundColor: form.uploadMethod === "paste" ? (dm ? "#1E2D4F" : "#EEF2FF") : "transparent",
+                        color: form.uploadMethod === "paste" ? "#3B5BDB" : muted,
+                        fontSize: "0.85rem",
+                        fontWeight: form.uploadMethod === "paste" ? 600 : 400,
+                      }}
+                    >
+                      {t("volunteerDashboard.upload_method_paste")}
+                    </button>
+                  </div>
+                </div>
+
+                {/* File / Paste input */}
+                {form.uploadMethod === "file" ? (
+                  <div>
+                    <label style={{ fontSize: "0.875rem", fontWeight: 500, color: text, display: "block", marginBottom: "0.375rem" }}>
+                      {t("volunteerDashboard.field_book_file")} <span style={{ color: "#EF4444" }}>*</span>
+                    </label>
+                    <input
+                      type="file"
+                      accept=".epub,.txt"
+                      className="w-full"
+                      style={{ ...inputStyle, padding: "0.6rem" }}
+                      required={form.uploadMethod === "file"}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label style={{ fontSize: "0.875rem", fontWeight: 500, color: text, display: "block", marginBottom: "0.375rem" }}>
+                      {t("volunteerDashboard.field_book_text")} <span style={{ color: "#EF4444" }}>*</span>
+                    </label>
+                    <textarea
+                      value={form.bookContent}
+                      onChange={e => setForm({ ...form, bookContent: e.target.value })}
+                      placeholder={t("volunteerDashboard.field_book_text_placeholder")}
+                      required={form.uploadMethod === "paste"}
+                      rows={6}
+                      style={{ ...inputStyle, resize: "vertical" }}
+                    />
+                  </div>
+                )}
 
                 <div
                   className="rounded-xl p-4"
